@@ -6,7 +6,7 @@
 const int MPU = 0x68;
 
 // Variaveis para armazenar valores do sensor
-float AccX, AccY, AccZ, Temp, GyrX, GyrY, GyrZ;
+float AccX, AccY, AccZ, TempMPU, GyrX, GyrY, GyrZ, chip_temperature;
 
 void setup() {
   // Inicializa Serial
@@ -55,10 +55,12 @@ void loop() {
   AccX = Wire.read() << 8 | Wire.read(); //0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)
   AccY = Wire.read() << 8 | Wire.read(); //0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
   AccZ = Wire.read() << 8 | Wire.read(); //0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
-  Temp = Wire.read() << 8 | Wire.read(); //0x41 (TEMP_OUT_H) & 0x42 (TEMP_OUT_L)
+  TempMPU = Wire.read() << 8 | Wire.read(); //0x41 (TEMP_OUT_H) & 0x42 (TEMP_OUT_L)
   GyrX = Wire.read() << 8 | Wire.read(); //0x43 (GYRO_XOUT_H) & 0x44 (GYRO_XOUT_L)
   GyrY = Wire.read() << 8 | Wire.read(); //0x45 (GYRO_YOUT_H) & 0x46 (GYRO_YOUT_L)
   GyrZ = Wire.read() << 8 | Wire.read(); //0x47 (GYRO_ZOUT_H) & 0x48 (GYRO_ZOUT_L)
+
+  chip_temperature = (TempMPU + 12421) / 340;
 
   // Imprime na Serial os valores obtidos
   /* Alterar divisão conforme fundo de escala escolhido:
@@ -75,25 +77,32 @@ void loop() {
       +/-2000°/s = 16.4
   */
   
-  /*
+  
   Serial.print("Acelerômetro [g]  "); 
   Serial.print("   X = ");
   Serial.print(AccX / 2048);   
   Serial.print("   Y = ");
-  Serial.print(AccY / 2048);
+  Serial.print((AccY / 2048) +0,07);
   Serial.print("   Z = ");
-  Serial.println(AccZ / 2048);
+  Serial.println((AccZ / 2048) -0,4);
   Serial.print("\n");
-   */
-  
+  Serial.print("Temperatura do chip =    ");
+  Serial.print(chip_temperature);
+  Serial.print("\n");
+  /*
   Serial.print("Giroscópio [°/s]  ");
   Serial.print("   X = ");
-  Serial.print(GyrX / 131);
+  Serial.print((GyrX / 131) + 5,4);
   Serial.print("   Y = ");
-  Serial.print(GyrY / 131);
+  Serial.print((GyrY / 131) + 5,7);
   Serial.print("   Z = ");
-  Serial.println(GyrZ / 131);
+  Serial.println((GyrZ / 131) +15,7);
+  Serial.print("\n");
+  Serial.print("Temperatura do chip =    ");
+  Serial.print(chip_temperature);
+  Serial.print("\n");
+  */
 
   // Atraso de 100ms
-  delay(100);
+  delay(500);
 }
